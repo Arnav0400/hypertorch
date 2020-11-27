@@ -88,12 +88,12 @@ class GradientDescent(DifferentiableOptimizer):
 
 
 def gd_step(params, loss, step_size, create_graph=True):
-    grads = torch.autograd.grad(loss, params, create_graph=create_graph)
+    grads = torch.autograd.grad(loss, params, create_graph=create_graph, allow_unused = True)
     return [w - step_size * g for w, g in zip(params, grads)]
 
 
 def heavy_ball_step(params, aux_params, loss, step_size, momentum, create_graph=True):
-    grads = torch.autograd.grad(loss, params, create_graph=create_graph)
+    grads = torch.autograd.grad(loss, params, create_graph=create_graph, allow_unused = True)
     return [w - step_size * g + momentum * (w - v) for g, w, v in zip(grads, params, aux_params)], params
 
 
@@ -104,7 +104,7 @@ def torch_momentum_step(params, aux_params, loss, step_size, momentum, create_gr
               v_{t+1} = \mu * v_{t} + g_{t+1} \\
               p_{t+1} = p_{t} - lr * v_{t+1}
     """
-    grads = torch.autograd.grad(loss, params, create_graph=create_graph)
+    grads = torch.autograd.grad(loss, params, create_graph=create_graph, allow_unused = True)
     new_aux_params = [momentum*v + g for v, g in zip(aux_params, grads)]
     return [w - step_size * nv for w, nv in zip(params, new_aux_params)], new_aux_params
 
