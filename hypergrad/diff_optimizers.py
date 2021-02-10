@@ -1,6 +1,6 @@
 import torch
 from itertools import repeat
-
+from hypergrad.utils import custom_grad
 
 class DifferentiableOptimizer:
     def __init__(self, loss_f, dim_mult, data_or_iter=None):
@@ -88,7 +88,8 @@ class GradientDescent(DifferentiableOptimizer):
 
 
 def gd_step(params, loss, step_size, create_graph=True):
-    grads = torch.autograd.grad(loss, params, create_graph=create_graph, allow_unused = True)
+    grads = custom_grad(loss, params, create_graph=create_graph, allow_unused = True)
+    
     return [w - step_size * g if g is not None else w for w, g in zip(params, grads)]
 
 

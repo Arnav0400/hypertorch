@@ -1,8 +1,9 @@
 import torch
-from torch.autograd import grad as torch_grad
+from hypergrad.utils import custom_grad as torch_grad
 from torch import Tensor
 from hypergrad import CG_torch
 from typing import List, Callable
+from hypergrad.utils import custom_grad
 
 
 # noinspection PyUnusedLocal
@@ -23,7 +24,7 @@ def reverse_unroll(params: List[Tensor],
         the list of hypergradients for each element in hparams
     """
     o_loss = outer_loss(params, hparams)
-    grads = torch.autograd.grad(o_loss, hparams, retain_graph=True)
+    grads = custom_grad(o_loss, hparams, retain_graph=True)
     if set_grad:
         update_tensor_grads(hparams, grads)
     return grads
@@ -177,7 +178,7 @@ def CG(params: List[Tensor],
 
     if stochastic:
         w_mapped = fp_map(params, hparams)
-
+    
     grads = torch_grad(w_mapped, hparams, grad_outputs=vs)
     grads = [g + v for g, v in zip(grads, grad_outer_hparams)]
 
@@ -271,7 +272,7 @@ def exact(opt_params_f: Callable[[List[Tensor]], List[Tensor]],
 # UTILS
 
 def grd(a, b):
-    return torch.autograd.grad(a, b, create_graph=True, retain_graph=True)
+    return custom_grad(a, b, create_graph=True, retain_graph=True)
 
 
 def list_dot(l1, l2):  # extended dot product for lists
@@ -304,9 +305,9 @@ def update_tensor_grads(hparams, grads):
 
 
 def grad_unused_zero(output, inputs, grad_outputs=None, retain_graph=False, create_graph=False):
-    grads = torch.autograd.grad(output, inputs, grad_outputs=grad_outputs, allow_unused=True,
+    
+    grads = custom_grad(output, inputs, grad_outputs=grad_outputs, allow_unused=True,
                                 retain_graph=retain_graph, create_graph=create_graph)
-
     def grad_or_zeros(grad, var):
         return torch.zeros_like(var) if grad is None else grad
 
